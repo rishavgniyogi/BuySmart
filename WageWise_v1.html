@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WageWise — v1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #6b8068;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .app {
+      font-family: 'DM Sans', sans-serif;
+      background: #8a9e87;
+      padding: 18px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    /* ── Tabs ── */
+    .tab-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .tab {
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+      letter-spacing: .09em; text-transform: uppercase;
+      padding: 13px 0; border-radius: 12px; border: none; cursor: pointer;
+      transition: background .25s ease, color .25s ease;
+    }
+
+    /* ── Slider ── */
+    .slider-wrap { overflow: hidden; border-radius: 18px; }
+    .slider-track { display: flex; width: 200%; transition: transform .42s cubic-bezier(.65,0,.35,1); }
+    .slide { width: 50%; flex-shrink: 0; }
+    .slide + .slide { padding-left: 12px; }
+
+    /* ── Card ── */
+    .card { background: #f4f0e6; border-radius: 18px; padding: 28px; }
+    .card-label {
+      display: inline-flex; align-items: center; gap: 7px;
+      border: 1.5px solid rgba(26,26,22,.22); border-radius: 100px;
+      padding: 6px 14px 6px 8px; font-size: 10px; font-weight: 500;
+      letter-spacing: .14em; text-transform: uppercase; color: #4a4a3e; margin-bottom: 22px;
+    }
+    .label-icon {
+      width: 20px; height: 20px; border-radius: 50%; background: #1a1a16;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: #f4f0e6; flex-shrink: 0;
+    }
+    .big-heading {
+      font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800;
+      line-height: 1.05; color: #1a1a16; margin-bottom: 4px;
+    }
+    .big-heading em { font-style: normal; color: #6b7a5e; }
+    .sub-text { font-size: 13px; color: #8a9a78; margin-bottom: 20px; font-weight: 300; }
+
+    /* ── Toggle ── */
+    .toggle-row { display: flex; gap: 6px; margin-bottom: 20px; }
+    .t-btn {
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      padding: 7px 20px; border-radius: 100px;
+      border: 1.5px solid rgba(26,26,22,.22); background: transparent;
+      color: #6b7a5e; cursor: pointer; transition: all .2s;
+    }
+    .t-btn.active { background: #1a1a16; color: #f4f0e6; border-color: #1a1a16; }
+
+    /* ── Fields ── */
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+      color: #8a9a78; height: 15px; display: flex; align-items: center;
+    }
+    .field select {
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      border: 1.5px solid rgba(26,26,22,.14); border-radius: 10px;
+      background: #fff; color: #1a1a16; outline: none; transition: all .2s;
+      -webkit-appearance: none; width: 100%; height: 46px; min-height: 46px; max-height: 46px; padding: 0 14px;
+    }
+    .field select:focus { border-color: #1a1a16; box-shadow: 0 0 0 3px rgba(107,122,94,.18); }
+
+    /* Shared box sizing for input + hint */
+    .box {
+      height: 46px; min-height: 46px; max-height: 46px;
+      border-radius: 10px; display: flex; align-items: center;
+      padding: 0 14px; width: 100%;
+    }
+    .box-input {
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      border: 1.5px solid rgba(26,26,22,.14); background: #fff;
+      color: #1a1a16; outline: none; transition: border .2s; -webkit-appearance: none;
+    }
+    .box-input:focus { border-color: #1a1a16; box-shadow: 0 0 0 3px rgba(107,122,94,.18); }
+    .box-hint {
+      background: rgba(26,26,22,.06); font-size: 11px; color: #8a9a78;
+      white-space: nowrap; overflow: hidden;
+    }
+    .box-hint strong { color: #5a6a4e; }
+
+    /* ── Circles ── */
+    .circles-row { display: flex; gap: 10px; margin: 16px 0; }
+    .circle {
+      flex: 1; border-radius: 50%; aspect-ratio: 1;
+      background: rgba(26,26,22,.07);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px;
+    }
+    .circle-v { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800; color: #1a1a16; line-height: 1; text-align: center; }
+    .circle-l { font-size: 8px; color: #8a9a78; text-transform: uppercase; letter-spacing: .08em; margin-top: 3px; text-align: center; }
+
+    /* ── Result block ── */
+    .result-block {
+      background: #1a1a16; border-radius: 14px; padding: 20px 22px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .r-lbl { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: rgba(244,240,230,.38); margin-bottom: 5px; }
+    .r-val { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: #f4f0e6; line-height: 1; }
+    .r-sub { font-size: 11px; color: rgba(244,240,230,.3); margin-top: 4px; }
+    .i-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1.5px solid rgba(244,240,230,.2); background: transparent;
+      color: rgba(244,240,230,.5); font-size: 12px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-weight: 700; transition: all .2s; flex-shrink: 0;
+    }
+    .i-btn:hover { border-color: rgba(244,240,230,.7); color: #f4f0e6; }
+
+    /* ── Info panel ── */
+    .info-panel { display: none; background: rgba(0,0,0,.2); border-radius: 10px; padding: 14px; margin-top: 10px; }
+    .info-panel.show { display: block; }
+    .i-line { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .i-line:last-child { border: none; padding-top: 8px; }
+    .i-line span:first-child { font-size: 11px; color: rgba(255,255,255,.38); }
+    .i-line span:last-child { font-size: 12px; font-weight: 500; color: #f4f0e6; }
+    .i-line.tot span:last-child { color: #aace70; font-size: 14px; }
+
+    /* ── Cart ── */
+    .add-row { display: grid; grid-template-columns: 1fr 110px auto; gap: 8px; margin-bottom: 14px; align-items: end; }
+    .add-btn {
+      font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+      letter-spacing: .06em; padding: 0 16px; border-radius: 10px;
+      background: #1a1a16; color: #f4f0e6; border: none; cursor: pointer;
+      height: 46px; min-height: 46px; max-height: 46px;
+      text-transform: uppercase; transition: opacity .2s; white-space: nowrap;
+    }
+    .add-btn:hover { opacity: .75; }
+    .cart-input {
+      font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 0 14px;
+      border: 1.5px solid rgba(26,26,22,.14); border-radius: 10px;
+      background: #fff; color: #1a1a16; outline: none; transition: all .2s;
+      width: 100%; height: 46px; min-height: 46px; max-height: 46px;
+    }
+    .cart-input:focus { border-color: #1a1a16; }
+    .items-list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
+    .items-list::-webkit-scrollbar { width: 3px; }
+    .items-list::-webkit-scrollbar-thumb { background: #c0caa8; border-radius: 3px; }
+    .item-card {
+      background: #fff; border-radius: 12px; padding: 13px 15px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      border: 1.5px solid transparent; transition: border .2s;
+    }
+    .item-card:hover { border-color: rgba(107,122,94,.3); }
+    .item-name { font-size: 13px; font-weight: 600; color: #1a1a16; margin-bottom: 2px; }
+    .item-cost { font-size: 11px; color: #8a9a78; }
+    .item-hrs { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: #1a1a16; line-height: 1; text-align: right; }
+    .item-days { font-size: 9px; color: #8a9a78; text-transform: uppercase; letter-spacing: .05em; text-align: right; margin-top: 2px; }
+    .del-btn { background: none; border: none; cursor: pointer; font-size: 16px; color: #ccc; padding: 2px 4px; transition: color .2s; flex-shrink: 0; }
+    .del-btn:hover { color: #e24b4a; }
+    .no-sal { text-align: center; padding: 40px 20px; }
+    .no-sal strong { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: #1a1a16; display: block; margin-bottom: 6px; }
+    .no-sal span { font-size: 12px; color: #8a9a78; font-style: italic; }
+    .empty { text-align: center; padding: 24px; font-size: 12px; color: #8a9a78; font-style: italic; }
+    #result-area { display: none; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="tab-bar">
+      <button class="tab" id="tab-wage" onclick="switchTab(0)">
+        <span style="font-size:15px;font-weight:700">$</span>
+        <span>Wage</span>
+      </button>
+      <button class="tab" id="tab-cart" onclick="switchTab(1)">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 1h2l2 8h7l1.5-5H5"/><circle cx="7" cy="13.5" r="1.2"/><circle cx="12" cy="13.5" r="1.2"/>
+        </svg>
+        <span>Cart</span>
+      </button>
+    </div>
+
+    <div class="slider-wrap">
+      <div class="slider-track" id="slider-track">
+
+        <!-- Wage Page -->
+        <div class="slide">
+          <div class="card">
+            <div class="card-label">
+              <div class="label-icon">$</div>
+              Your Salary
+            </div>
+            <div class="big-heading">Your time,<br><em>in numbers.</em></div>
+            <p class="sub-text">Assuming 22 working days per month.</p>
+            <div class="toggle-row">
+              <button class="t-btn active" id="btn-m" onclick="setMode('monthly')">Monthly</button>
+              <button class="t-btn" id="btn-y" onclick="setMode('yearly')">Yearly</button>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label id="sal-lbl">Monthly Salary</label>
+                <input class="box box-input" type="number" id="salary-input" placeholder="e.g. 80000" oninput="calc()" />
+              </div>
+              <div class="field">
+                <label>Currency</label>
+                <select id="currency-select" onchange="calc()">
+                  <option value="INR" data-sym="₹">₹ INR — Indian Rupee</option>
+                  <option value="USD" data-sym="$">$ USD — US Dollar</option>
+                  <option value="EUR" data-sym="€">€ EUR — Euro</option>
+                  <option value="GBP" data-sym="£">£ GBP — British Pound</option>
+                  <option value="AED" data-sym="AED ">AED — UAE Dirham</option>
+                  <option value="SGD" data-sym="S$">S$ SGD — Singapore</option>
+                  <option value="JPY" data-sym="¥">¥ JPY — Japanese Yen</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label>Avg Hours / Day</label>
+                <input class="box box-input" type="number" id="hours-input" value="8" min="1" max="24" oninput="calc()" />
+              </div>
+              <div class="field">
+                <label>&nbsp;</label>
+                <div class="box box-hint">
+                  22d × <span id="hrs-p">8</span>h = <strong>&nbsp;<span id="total-h">176</span> hrs/mo</strong>
+                </div>
+              </div>
+            </div>
+            <div id="result-area">
+              <div class="circles-row" id="circles-area"></div>
+              <div class="result-block">
+                <div>
+                  <div class="r-lbl">Hourly Wage</div>
+                  <div class="r-val" id="r-val">—</div>
+                  <div class="r-sub" id="r-sub"></div>
+                </div>
+                <button class="i-btn" onclick="toggleInfo()">i</button>
+              </div>
+              <div class="info-panel" id="info-panel">
+                <div class="i-line"><span>Salary input</span><span id="ip-sal">—</span></div>
+                <div class="i-line"><span>Monthly salary</span><span id="ip-mo">—</span></div>
+                <div class="i-line"><span>Working days/month</span><span>22 days</span></div>
+                <div class="i-line"><span>Hours/day</span><span id="ip-hrs">—</span></div>
+                <div class="i-line"><span>Monthly hours</span><span id="ip-thrs">—</span></div>
+                <div class="i-line tot"><span>Monthly ÷ hours</span><span id="ip-res">—</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cart Page -->
+        <div class="slide">
+          <div class="card">
+            <div class="card-label">
+              <div class="label-icon">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 1h2l2 8h7l1.5-5H5"/><circle cx="7" cy="13.5" r="1.2"/><circle cx="12" cy="13.5" r="1.2"/>
+                </svg>
+              </div>
+              Your Cart
+            </div>
+            <div class="big-heading">What things<br><em>cost you.</em></div>
+            <p class="sub-text">In hours of your life.</p>
+            <div id="no-sal-msg" class="no-sal" style="display:none">
+              <strong>Set your wage first</strong>
+              <span>Go to Wage and enter your salary.</span>
+            </div>
+            <div id="items-section">
+              <div class="add-row">
+                <div class="field">
+                  <label>Item name</label>
+                  <input class="cart-input" type="text" id="item-name" placeholder="e.g. MacBook Pro" onkeydown="if(event.key==='Enter')addItem()" />
+                </div>
+                <div class="field">
+                  <label>Cost (<span id="ic-sym">₹</span>)</label>
+                  <input class="cart-input" type="number" id="item-cost" placeholder="0" min="0" onkeydown="if(event.key==='Enter')addItem()" />
+                </div>
+                <button class="add-btn" onclick="addItem()">Add</button>
+              </div>
+              <div class="items-list" id="items-list">
+                <div class="empty">Your cart is empty — add something you want.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ACTIVE_BG = '#f4f0e6', ACTIVE_COL = '#1a1a16';
+    const INACTIVE_BG = 'rgba(255,255,255,0.13)', INACTIVE_COL = 'rgba(255,255,255,0.5)';
+
+    function applyTabStyle(el, active) {
+      el.style.setProperty('background', active ? ACTIVE_BG : INACTIVE_BG, 'important');
+      el.style.setProperty('color', active ? ACTIVE_COL : INACTIVE_COL, 'important');
+    }
+
+    function switchTab(i) {
+      applyTabStyle(document.getElementById('tab-wage'), i === 0);
+      applyTabStyle(document.getElementById('tab-cart'), i === 1);
+      document.getElementById('slider-track').style.transform = i ? 'translateX(-50%)' : 'translateX(0)';
+      if (i === 1) renderItems();
+    }
+
+    applyTabStyle(document.getElementById('tab-wage'), true);
+    applyTabStyle(document.getElementById('tab-cart'), false);
+
+    let mode = 'monthly', hourlyWage = 0, currSym = '₹', items = [];
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById('btn-m').classList.toggle('active', m === 'monthly');
+      document.getElementById('btn-y').classList.toggle('active', m === 'yearly');
+      document.getElementById('sal-lbl').textContent = m === 'monthly' ? 'Monthly Salary' : 'Yearly Salary';
+      calc();
+    }
+
+    function getSym() {
+      const s = document.getElementById('currency-select');
+      return s.options[s.selectedIndex].dataset.sym;
+    }
+
+    function fmt(n) {
+      const sym = getSym();
+      if (n >= 1e7) return sym + (n / 1e7).toFixed(2) + ' Cr';
+      if (n >= 1e5) return sym + (n / 1e5).toFixed(2) + ' L';
+      if (n >= 1000) return sym + (n / 1000).toFixed(1) + 'K';
+      return sym + Math.round(n).toLocaleString();
+    }
+
+    function fmtFull(n) { return getSym() + Math.round(n).toLocaleString(); }
+
+    function calc() {
+      const sal = parseFloat(document.getElementById('salary-input').value) || 0;
+      const hrs = parseFloat(document.getElementById('hours-input').value) || 8;
+      document.getElementById('hrs-p').textContent = hrs;
+      document.getElementById('total-h').textContent = 22 * hrs;
+      currSym = getSym();
+      document.getElementById('ic-sym').textContent = currSym;
+      if (sal <= 0) { hourlyWage = 0; document.getElementById('result-area').style.display = 'none'; return; }
+      const monthly = mode === 'yearly' ? sal / 12 : sal;
+      const totalHrs = 22 * hrs;
+      hourlyWage = monthly / totalHrs;
+      document.getElementById('result-area').style.display = 'block';
+      document.getElementById('r-val').textContent = fmt(hourlyWage) + '/hr';
+      document.getElementById('r-sub').textContent = fmt(monthly) + '/mo · ' + fmt(monthly * 12) + '/yr';
+      document.getElementById('circles-area').innerHTML = [
+        ['Per Day', fmt(monthly / 22)],
+        ['Per Week', fmt(monthly / 22 * 5)],
+        ['Per Month', fmt(monthly)]
+      ].map(([l, v]) => `<div class="circle"><div class="circle-v">${v}</div><div class="circle-l">${l}</div></div>`).join('');
+      document.getElementById('ip-sal').textContent = fmtFull(sal) + (mode === 'yearly' ? ' /yr' : ' /mo');
+      document.getElementById('ip-mo').textContent = fmtFull(monthly) + '/mo';
+      document.getElementById('ip-hrs').textContent = hrs + ' hrs';
+      document.getElementById('ip-thrs').textContent = (22 * hrs) + ' hrs/mo';
+      document.getElementById('ip-res').textContent = fmtFull(hourlyWage) + '/hr';
+      saveState();
+    }
+
+    function toggleInfo() { document.getElementById('info-panel').classList.toggle('show'); }
+
+    function addItem() {
+      const name = document.getElementById('item-name').value.trim();
+      const cost = parseFloat(document.getElementById('item-cost').value) || 0;
+      if (!name || cost <= 0) return;
+      items.push({ id: Date.now(), name, cost });
+      document.getElementById('item-name').value = '';
+      document.getElementById('item-cost').value = '';
+      renderItems();
+      saveState();
+    }
+
+    function removeItem(id) { items = items.filter(i => i.id !== id); renderItems(); saveState(); }
+
+    function renderItems() {
+      const noSal = document.getElementById('no-sal-msg');
+      const sec = document.getElementById('items-section');
+      if (hourlyWage <= 0) { noSal.style.display = 'block'; sec.style.display = 'none'; return; }
+      noSal.style.display = 'none'; sec.style.display = 'block';
+      const list = document.getElementById('items-list');
+      const hrs = parseFloat(document.getElementById('hours-input').value) || 8;
+      if (!items.length) { list.innerHTML = '<div class="empty">Your cart is empty — add something you want.</div>'; return; }
+      list.innerHTML = items.map(item => {
+        const h = item.cost / hourlyWage;
+        const hd = h >= 100 ? Math.round(h).toLocaleString() : h >= 1 ? h.toFixed(1) : h.toFixed(2);
+        const days = h / hrs;
+        const dayStr = days >= 0.5 ? `${days.toFixed(1)} work days` : '';
+        return `<div class="item-card">
+          <div><div class="item-name">${item.name}</div><div class="item-cost">${currSym}${item.cost.toLocaleString()}</div></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div><div class="item-hrs">${hd} hrs</div><div class="item-days">${dayStr}</div></div>
+            <button class="del-btn" onclick="removeItem(${item.id})">×</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem('wagewise_v1', JSON.stringify({
+          sal: document.getElementById('salary-input').value,
+          hrs: document.getElementById('hours-input').value,
+          cur: document.getElementById('currency-select').value,
+          mode, items
+        }));
+      } catch (e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem('wagewise_v1');
+        if (!raw) return;
+        const s = JSON.parse(raw);
+        if (s.sal) document.getElementById('salary-input').value = s.sal;
+        if (s.hrs) document.getElementById('hours-input').value = s.hrs;
+        if (s.cur) document.getElementById('currency-select').value = s.cur;
+        if (s.items) items = s.items;
+        if (s.mode) setMode(s.mode); else calc();
+      } catch (e) {}
+      calc();
+    }
+
+    loadState();
+  </script>
+</body>
+</html>
